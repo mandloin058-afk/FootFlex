@@ -1,0 +1,36 @@
+{% load store_tags %}
+{# Product card. Use:  {% include "store/_card.html" with p=product %} #}
+<article class="card product-card" data-scope>
+  <div class="pc-media">
+    <a href="{% url 'product' p.pk %}" aria-label="View {{ p.name }}">
+      <div class="media">{% product_image p %}</div>
+    </a>
+    {% if p.extra_count %}<span class="more-photos" aria-label="{{ p.extra_count }} more photos">+{{ p.extra_count }}</span>{% endif %}
+    <div class="pc-badges">
+      {% if p.discount_pct %}<span class="chip sale">-{{ p.discount_pct }}%</span>{% endif %}
+      {% if p.is_new %}<span class="chip new">New</span>{% endif %}
+      {% if p.total_stock == 0 %}<span class="chip out">Sold out</span>{% elif p.total_stock <= 8 %}<span class="chip">Only {{ p.total_stock }} left</span>{% endif %}
+    </div>
+    <form method="post" action="{% url 'wishlist_toggle' %}" data-ajax data-wish>
+      {% csrf_token %}<input type="hidden" name="product" value="{{ p.pk }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="wish-btn {% if p.pk in wished_ids %}on{% endif %}" type="submit" aria-label="Toggle wishlist"><svg class="ic"><use href="#i-heart"/></svg></button>
+    </form>
+    {% if p.total_stock > 0 %}
+    <form class="quick-sizes" method="post" action="{% url 'cart_add' %}" data-ajax data-quick>
+      {% csrf_token %}
+      <input type="hidden" name="product" value="{{ p.pk }}"><input type="hidden" name="color" value="{{ p.first_color.name }}"><input type="hidden" name="size" value="">
+      <div class="qs-head"><span>Select UK size</span><button type="button" data-quick-close aria-label="Close"><svg class="ic sm"><use href="#i-close"/></svg></button></div>
+      <div class="qs-grid">{% for s in p.stock_list %}<button type="button" data-size="{{ s.size }}" {% if not s.qty %}disabled{% endif %}>{{ s.size }}</button>{% endfor %}</div>
+    </form>
+    {% endif %}
+  </div>
+  <div class="pc-body">
+    <div class="pc-meta"><span>{{ p.category }} · {{ p.type }}</span><span><svg class="ic sm fill"><use href="#i-star"/></svg> {{ p.rating }}</span></div>
+    <h3><a href="{% url 'product' p.pk %}">{{ p.name }}</a></h3>
+    <div class="swatches">{% for c in p.color_list %}<button type="button" class="swatch {% if forloop.first %}on{% endif %}" data-swatch {% swatch_attrs c %} title="{{ c.name }}" aria-label="Colour {{ c.name }}"></button>{% endfor %}</div>
+    <div class="pc-foot">
+      <div class="price"><b>{{ p.price|inr }}</b>{% if p.discount_pct %}<s>{{ p.mrp|inr }}</s>{% endif %}</div>
+      <button class="btn btn-sm" type="button" data-quick-open {% if p.total_stock == 0 %}disabled{% endif %}>{% if p.total_stock == 0 %}Sold out{% else %}Quick add{% endif %}</button>
+    </div>
+  </div>
+</article>

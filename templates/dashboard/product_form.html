@@ -1,0 +1,49 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}{% if product %}Edit {{ product.name }}{% else %}New product{% endif %} — FootFlex admin{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>{% if product %}Edit product{% else %}New product{% endif %}</h1><a class="btn btn-ghost btn-sm" href="{% url 'dash_products' %}">← Back</a></div>
+<form method="post" enctype="multipart/form-data" class="panel" novalidate>
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div class="form-grid">
+    <div class="field"><label for="id_name"><span>Name</span></label>{{ form.name }}{% for e in form.name.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+    <div class="field"><label for="id_category"><span>Category</span></label>{{ form.category }}</div>
+    <div class="field"><label for="id_type"><span>Type</span></label>{{ form.type }}</div>
+    <div class="field"><label for="id_pattern"><span>Side design</span></label>{{ form.pattern }}</div>
+    <div class="field"><label for="id_price"><span>Selling price (₹)</span></label>{{ form.price }}{% for e in form.price.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+    <div class="field"><label for="id_mrp"><span>MRP (₹)</span></label>{{ form.mrp }}{% for e in form.mrp.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+    <div class="field full"><label for="id_description"><span>Description</span></label>{{ form.description }}</div>
+    <div class="field full"><label for="id_specs"><span>Specifications (one per line — “Upper: Mesh”)</span></label>{{ form.specs }}</div>
+
+    <div class="field full"><span>Colours</span><div class="check-grid">{{ form.colorways }}</div>{% for e in form.colorways.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+
+    <div class="field full"><span>Main photo (PNG / JPG / WebP, max 3 MB)</span>
+      <div class="preview-box media">{% if product and product.image %}<img id="imgPreview" class="product-photo" src="{{ product.image.url }}" alt="">{% else %}<img id="imgPreview" class="product-photo" alt="" hidden>{% if product %}{% product_image product %}{% endif %}{% endif %}</div>
+      <input type="file" id="id_image" name="image" accept="image/png,image/jpeg,image/webp">
+      {% if product and product.image %}<label class="check"><input type="checkbox" name="image-clear"><span>Remove main photo</span></label>{% endif %}
+      {% for e in form.image.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      <p class="small muted" style="margin:0">Best: white or transparent background, shoe side view, at least 1000 px. It is fitted inside the card (never cropped).</p>
+    </div>
+
+    <div class="field full"><span>More photos — other angles (optional, up to 8 in total)</span>
+      {% if product and product.photos.all %}
+      <div class="photo-grid">{% for ph in product.photos.all %}<label class="photo-item"><img src="{{ ph.image.url }}" alt=""><span class="check"><input type="checkbox" name="delete_photo" value="{{ ph.pk }}"> Delete</span></label>{% endfor %}</div>
+      {% endif %}
+      <input type="file" name="photos" accept="image/png,image/jpeg,image/webp" multiple>
+      {% for e in photo_errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      <p class="small muted" style="margin:0">Select several files at once (hold Ctrl). Hover on the shop card shows the 2nd photo, the product page shows all as thumbnails.</p>
+    </div>
+
+    <div class="field full"><span>Stock per size (UK)</span>
+      {% for e in stock_errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      {% for g in stock_groups %}
+      <div class="stock-group" data-cat="{{ g.cat }}"><div class="stock-inputs">{% for r in g.rows %}<div><label for="{{ r.name }}">UK {{ r.size }}</label><input type="number" min="0" id="{{ r.name }}" name="{{ r.name }}" value="{{ r.value }}"></div>{% endfor %}</div></div>
+      {% endfor %}
+    </div>
+    <div class="field"><label class="check"><input type="checkbox" name="featured" {% if form.featured.value %}checked{% endif %}><span>Featured on home page</span></label></div>
+    <div class="field"><label class="check"><input type="checkbox" name="is_new" {% if form.is_new.value %}checked{% endif %}><span>Mark as “New”</span></label></div>
+  </div>
+  <button class="btn btn-lg" type="submit">{% if product %}Save changes{% else %}Create product{% endif %}</button>
+</form>
+{% endblock %}

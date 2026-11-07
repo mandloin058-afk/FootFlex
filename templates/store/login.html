@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}Log in — FootFlex{% endblock %}
+{% block content %}
+<div class="container page">
+  <div class="auth">
+    <div class="auth-art"><span class="eyebrow">Welcome back</span><h2 style="margin-top:12px">Log in &amp; get moving</h2><div class="disc">{% shoe "#0F2A5E" "#27B6FF" "swoosh" "Sneaker" %}</div></div>
+    <form class="auth-form" method="post" novalidate>
+      {% csrf_token %}<input type="hidden" name="next" value="{{ next }}">
+      <h1 class="h1" style="font-size:2.2rem">Log in</h1>
+      {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+      <div class="field"><label for="email"><span>E-mail</span></label><input type="email" id="email" name="email" autocomplete="email" required autofocus value="{{ request.POST.email }}"></div>
+      <div class="field"><label for="password"><span>Password</span></label><input type="password" id="password" name="password" autocomplete="current-password" required></div>
+      <button class="btn btn-lg btn-block" type="submit">Log in</button>
+      <p class="small center" style="margin-top:16px">New here? <a class="link-btn" href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a></p>
+      <!-- <div class="demo-box"><b>Demo accounts</b><br>Customer: demo@footflex.in / demo123<br>Admin: admin@footflex.in / admin123</div> -->
+    </form>
+  </div>
+</div>
+{% endblock %}

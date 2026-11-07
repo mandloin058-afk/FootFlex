@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}{{ title }} — FootFlex{% endblock %}
+{% block content %}
+<div class="container page">
+  <div class="shop-head">
+    <div>
+      <div class="crumbs"><a href="{% url 'home' %}">Home</a> / {{ title }}</div>
+      <h1 class="h1" style="margin:0">{{ title }}</h1>
+      <p class="muted" style="margin:6px 0 0">{{ count }} style{{ count|pluralize }}</p>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-ghost btn-sm filter-toggle" type="button" data-filter-toggle><svg class="ic sm"><use href="#i-filter"/></svg> Filters{% if active_filters %} ({{ active_filters }}){% endif %}</button>
+      <select id="sortSelect" aria-label="Sort by">{% for k, l in sorts %}<option value="{{ k }}" {% if k == sort %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    </div>
+  </div>
+
+  <div class="shop-layout">
+    <form class="card filters" id="filters" method="get">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+      <div class="f-head"><h3>Filters{% if active_filters %} ({{ active_filters }}){% endif %}</h3>{% if active_filters %}<a class="link-btn small" href="?{% if q %}q={{ q|urlencode }}{% endif %}">Clear all</a>{% endif %}</div>
+
+      {% if not fixed_category %}
+      <fieldset><legend>Category</legend>
+        <div class="pill-row">
+          <label class="pill"><input type="radio" name="cat" value="" {% if not cat %}checked{% endif %}><span>All</span></label>
+          {% for k, l in categories %}<label class="pill"><input type="radio" name="cat" value="{{ k }}" {% if cat == k %}checked{% endif %}><span>{{ l }}</span></label>{% endfor %}
+        </div>
+      </fieldset>
+      {% endif %}
+
+      <fieldset><legend>Type</legend>
+        {% for t in types_all %}<label class="check"><input type="checkbox" name="type" value="{{ t }}" {% if t in sel_types %}checked{% endif %}><span>{{ t }}</span></label>{% endfor %}
+      </fieldset>
+
+      <fieldset><legend>Max price <b id="maxOut" style="margin-left:auto">{% if max_p %}{{ max_p|inr }}{% else %}{{ price_ceil|inr }}{% endif %}</b></legend>
+        <input type="range" id="maxRange" name="max" min="1000" max="{{ price_ceil }}" step="500" value="{% if max_p %}{{ max_p }}{% else %}{{ price_ceil }}{% endif %}" aria-label="Maximum price">
+        <div class="range-labels"><span>₹1,000</span><span>{{ price_ceil|inr }}</span></div>
+      </fieldset>
+
+      <fieldset><legend>Size (UK)</legend>
+        <div class="pill-row">{% for s in all_sizes %}<label class="pill"><input type="checkbox" name="size" value="{{ s }}" {% if s in sel_sizes %}checked{% endif %}><span>{{ s }}</span></label>{% endfor %}</div>
+      </fieldset>
+
+      <fieldset><legend>Colour</legend>
+        <div class="pill-row">{% for c in all_colors %}<label class="pill"><input type="checkbox" name="color" value="{{ c.name }}" {% if c.name in sel_colors %}checked{% endif %}><span>{{ c.name }}</span></label>{% endfor %}</div>
+      </fieldset>
+
+      <fieldset><legend>Rating</legend>
+        <div class="pill-row">
+          <label class="pill"><input type="radio" name="rating" value="" {% if not min_rating %}checked{% endif %}><span>Any</span></label>
+          <label class="pill"><input type="radio" name="rating" value="4" {% if min_rating == 4 %}checked{% endif %}><span>4★+</span></label>
+          <label class="pill"><input type="radio" name="rating" value="4.5" {% if min_rating == 4.5 %}checked{% endif %}><span>4.5★+</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset><legend>Availability</legend>
+        <label class="check"><input type="checkbox" name="stock" value="1" {% if only_stock %}checked{% endif %}><span>In stock only</span></label>
+        <label class="check"><input type="checkbox" name="sale" value="1" {% if only_sale %}checked{% endif %}><span>On sale (20%+ off)</span></label>
+      </fieldset>
+      <noscript><button class="btn btn-block" type="submit">Apply filters</button></noscript>
+    </form>
+
+    <div>
+      {% if page.object_list %}
+      <div class="product-grid">{% for p in page %}{% include "store/_card.html" %}{% endfor %}</div>
+      {% if page.paginator.num_pages > 1 %}
+      <nav class="pager" aria-label="Pages">
+        {% if page.has_previous %}<a href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.previous_page_number }}">← Prev</a>{% endif %}
+        {% for n in page.paginator.page_range %}{% if n == page.number %}<span class="on">{{ n }}</span>{% else %}<a href="?{% if qs %}{{ qs }}&{% endif %}page={{ n }}">{{ n }}</a>{% endif %}{% endfor %}
+        {% if page.has_next %}<a href="?{% if qs %}{{ qs }}&{% endif %}page={{ page.next_page_number }}">Next →</a>{% endif %}
+      </nav>
+      {% endif %}
+      {% else %}
+      <div class="empty"><h3>No sneakers found</h3><p class="muted">Try removing a filter or searching for something else.</p><a class="btn" href="{% url 'shop' %}">Reset filters</a></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

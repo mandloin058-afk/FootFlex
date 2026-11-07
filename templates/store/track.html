@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}Track order — FootFlex{% endblock %}
+{% block content %}
+<div class="container page narrow">
+  <h1 class="h1">Track your order</h1>
+  <form class="panel" method="post">
+    {% csrf_token %}
+    <div class="form-grid">
+      <div class="field"><label for="oid"><span>Order ID</span></label><input type="text" id="oid" name="id" placeholder="FF-25C7D2" value="{{ oid }}" required></div>
+      <div class="field"><label for="contact"><span>E-mail or mobile used</span></label><input type="text" id="contact" name="contact" placeholder="you@example.com" value="{{ request.POST.contact }}"></div>
+    </div>
+    <button class="btn" type="submit">Track order</button>
+    {% if error %}<p class="field-error" style="margin-top:14px">{{ error }}</p>{% endif %}
+    <p class="small muted" style="margin:14px 0 0">Demo: order <b>FF-25C7D2</b> with <b>demo@footflex.in</b></p>
+  </form>
+  {% if order %}
+  <section class="card order-card" style="margin-top:26px">
+    <div class="order-head"><div><h3>{{ order.id }}</h3><span class="muted small">Placed {{ order.created_at|date:"d M Y, h:i A" }}</span></div><span class="status-badge {{ order.status }}">{{ order.status }}</span></div>
+    {% include "store/_timeline.html" %}
+    <ul class="small" style="margin:12px 0">{% for e in order.events.all %}<li style="padding:3px 0">• <b>{{ e.status }}</b> — {{ e.at|date:"d M, h:i A" }}</li>{% endfor %}</ul>
+    {% for i in order.items.all %}<div class="mini"><span class="thumb sm">{% shoe i.body i.accent "swoosh" i.name %}</span><div class="grow"><b>{{ i.name }}</b><span class="small muted">{{ i.color }} · UK {{ i.size }} · ×{{ i.qty }}</span></div><b>{{ i.line_total|inr }}</b></div>{% endfor %}
+    <p class="small muted" style="margin:12px 0 0">Delivering to {{ order.city }}, {{ order.state }} {{ order.pin }} · Total {{ order.total|inr }}</p>
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

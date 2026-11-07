@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}Order placed — FootFlex{% endblock %}
+{% block content %}
+<div class="container page narrow success">
+  <div class="tick"><svg class="ic" style="width:40px;height:40px;stroke-width:3"><use href="#i-check"/></svg></div>
+  <h1 class="h1">Order placed!</h1>
+  <p class="muted">Thanks, {{ order.name }}. Your order <b>{{ order.id }}</b> is confirmed. A summary was saved to your account.</p>
+  <div class="panel" style="text-align:left;margin-top:26px">
+    {% include "store/_timeline.html" %}
+    {% for i in order.items.all %}
+    <div class="mini"><div class="grow"><b>{{ i.name }}</b><span class="small muted">{{ i.color }} · UK {{ i.size }} · ×{{ i.qty }}</span></div><b>{{ i.line_total|inr }}</b></div>
+    {% endfor %}
+    <div class="sum-row"><span>Subtotal</span><span>{{ order.subtotal|inr }}</span></div>
+    {% if order.discount %}<div class="sum-row"><span>Discount {{ order.coupon }}</span><span>−{{ order.discount|inr }}</span></div>{% endif %}
+    <div class="sum-row"><span>Delivery</span><span>{% if order.shipping %}{{ order.shipping|inr }}{% else %}FREE{% endif %}</span></div>
+    <div class="sum-row total"><span>Total</span><span>{{ order.total|inr }}</span></div>
+    <p class="small muted" style="margin:14px 0 0">Paying with {{ order.payment }} · Delivering to {{ order.address_line }}, {{ order.city }}, {{ order.state }} {{ order.pin }}</p>
+  </div>
+  <div class="cta-row" style="justify-content:center">
+    <a class="btn" href="{% url 'account' %}">My orders</a><a class="btn btn-ghost" href="{% url 'shop' %}">Continue shopping</a>
+  </div>
+</div>
+{% endblock %}

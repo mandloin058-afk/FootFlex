@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}Orders — FootFlex admin{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>Orders</h1>
+  <form class="toolbar" method="get"><input type="search" name="q" value="{{ q }}" placeholder="ID, name, e-mail, phone…" aria-label="Search orders">
+    <select name="status" onchange="this.form.submit()" aria-label="Status"><option value="">All statuses</option>{% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></form></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Update</th></tr></thead>
+  <tbody>{% for r in rows %}{% with o=r.o %}
+  <tr><td><b>{{ o.id }}</b><br><span class="small muted">{{ o.created_at|date:"d M, h:i A" }}</span></td>
+    <td>{{ o.name }}<br><span class="small muted">{{ o.phone }} · {{ o.city }}</span></td>
+    <td class="small">{% for i in o.items.all %}{{ i.name }} (UK {{ i.size }}) ×{{ i.qty }}<br>{% endfor %}</td>
+    <td>{{ o.total|inr }}</td><td class="small">{{ o.payment }}</td>
+    <td><span class="status-badge {{ o.status }}">{{ o.status }}</span></td>
+    <td>{% if r.closed %}<span class="muted small">—</span>{% else %}
+      <form class="inline-form" method="post">{% csrf_token %}<input type="hidden" name="order" value="{{ o.id }}">
+        <select name="status" aria-label="New status">{% for s in r.next %}<option>{{ s }}</option>{% endfor %}<option>Cancelled</option></select><button class="btn btn-sm">Set</button></form>{% endif %}</td></tr>
+  {% endwith %}{% empty %}<tr><td colspan="7" class="center muted">No orders found</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

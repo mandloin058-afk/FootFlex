@@ -1,0 +1,10 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}Customers — FootFlex admin{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>Customers</h1></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Name</th><th>E-mail</th><th>Mobile</th><th>Joined</th><th>Orders</th><th>Spend</th></tr></thead>
+  <tbody>{% for c in customers %}<tr><td><b>{{ c.display_name }}</b></td><td>{{ c.email }}</td><td>{{ c.phone }}</td><td>{{ c.date_joined|date:"d M Y" }}</td><td>{{ c.n }}</td><td>{{ c.spend|default:0|inr }}</td></tr>
+  {% empty %}<tr><td colspan="6" class="center muted">No customers yet</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

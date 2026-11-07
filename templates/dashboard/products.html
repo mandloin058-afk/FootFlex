@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}Products — FootFlex admin{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>Products</h1>
+  <div class="toolbar"><form method="get"><input type="search" name="q" value="{{ q }}" placeholder="Search products…" aria-label="Search"></form><a class="btn btn-sm" href="{% url 'dash_product_new' %}">+ Add product</a></div></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Product</th><th>Category</th><th>Price</th><th>MRP</th><th>Stock</th><th>Sold</th><th></th></tr></thead>
+  <tbody>
+  {% for p in products %}
+  <tr>
+    <td><div class="row-prod"><span class="thumb sm">{% product_image p %}</span><div><b>{{ p.name }}</b><span class="small muted">{{ p.type }}{% if p.image %} · photo{% endif %}{% if p.featured %} · ★ featured{% endif %}</span></div></div></td>
+    <td class="cap">{{ p.category }}</td><td>{{ p.price|inr }}</td><td>{{ p.mrp|inr }}</td>
+    <td>{% if p.total_stock == 0 %}<span class="low">Sold out</span>{% else %}{{ p.total_stock }}{% endif %}</td><td>{{ p.sold }}</td>
+    <td style="white-space:nowrap"><a class="btn btn-ghost btn-sm" href="{% url 'dash_product_edit' p.pk %}">Edit</a>
+      <form class="inline-form" method="post" action="{% url 'dash_product_delete' p.pk %}" data-confirm="Delete {{ p.name }}?">{% csrf_token %}<button class="btn btn-ghost btn-sm">Delete</button></form></td>
+  </tr>
+  {% empty %}<tr><td colspan="7" class="center muted">No products found</td></tr>{% endfor %}
+  </tbody></table></div>
+{% endblock %}

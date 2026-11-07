@@ -1,0 +1,27 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}Dashboard — FootFlex{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>Overview</h1><a class="btn btn-sm" href="{% url 'dash_product_new' %}">+ Add product</a></div>
+<div class="kpis">
+  <div class="card kpi dark"><span>Revenue</span><b>{{ revenue|inr }}</b></div>
+  <div class="card kpi"><span>Orders</span><b>{{ orders_n }}</b></div>
+  <div class="card kpi"><span>Pending to ship</span><b>{{ pending }}</b></div>
+  <div class="card kpi"><span>Products</span><b>{{ products_n }}</b></div>
+  <div class="card kpi"><span>Customers</span><b>{{ customers_n }}</b></div>
+  <div class="card kpi"><span>Low-stock sizes</span><b>{{ low_sizes }}</b><span class="small muted">{{ out_n }} product{{ out_n|pluralize }} sold out</span></div>
+</div>
+<div class="dash-grid">
+  <section class="panel"><h3>Last 7 days</h3>
+    <div class="bars">{% for d in days %}<div title="{{ d.value|inr }}"><span>{{ d.value|inr }}</span><i style="height:{{ d.pct }}%"></i><span>{{ d.label }}</span></div>{% endfor %}</div></section>
+  <section class="panel"><h3>Orders by status</h3><ul class="st-list">{% for s, n in by_status %}<li><span>{{ s }}</span><b>{{ n }}</b></li>{% endfor %}</ul></section>
+</div>
+<div class="dash-grid">
+  <section class="panel"><h3>Recent orders</h3>
+    <table class="data"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>{% for o in recent %}<tr><td><b>{{ o.id }}</b></td><td>{{ o.name }}</td><td>{{ o.total|inr }}</td><td><span class="status-badge {{ o.status }}">{{ o.status }}</span></td></tr>{% endfor %}</tbody></table>
+    <p style="margin:14px 0 0"><a class="link-btn" href="{% url 'dash_orders' %}">All orders →</a></p></section>
+  <section class="panel"><h3>Top sellers</h3>
+    {% for p in top %}<div class="mini"><span class="thumb sm">{% product_image p %}</span><div class="grow"><b>{{ p.name }}</b><span class="small muted cap">{{ p.category }} · {{ p.price|inr }}</span></div><b>{{ p.sold }} sold</b></div>{% endfor %}</section>
+</div>
+{% endblock %}

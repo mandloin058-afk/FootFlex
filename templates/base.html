@@ -1,0 +1,81 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}FootFlex — Sneakers for every step{% endblock %}</title>
+  <meta name="description" content="FootFlex — men, women and kids sneakers in India. Free delivery above ₹2,999, COD, UPI and cards.">
+  <meta name="theme-color" content="#05070c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/footflex.css' %}">
+</head>
+<body>
+{% include "store/_icons.html" %}
+{% block header %}
+<header class="site-header">
+  <div class="container header-in">
+    <a class="logo" href="{% url 'home' %}" aria-label="FootFlex home"><span class="logo-mark">FF</span><span class="logo-text">Foot<b>Flex</b></span></a>
+    <nav class="nav" id="nav" aria-label="Main">
+      {% with n=request.resolver_match.url_name %}
+      <a href="{% url 'home' %}" class="{% if n == 'home' %}on{% endif %}">Home</a>
+      <a href="{% url 'men' %}" class="{% if n == 'men' %}on{% endif %}">Men</a>
+      <a href="{% url 'women' %}" class="{% if n == 'women' %}on{% endif %}">Women</a>
+      <a href="{% url 'kids' %}" class="{% if n == 'kids' %}on{% endif %}">Kids</a>
+      <a href="{% url 'shop' %}?sale=1">Sale</a>
+      {% endwith %}
+    </nav>
+    <div class="actions">
+      <button class="icon-btn" type="button" data-search-toggle aria-label="Search" aria-expanded="false"><svg class="ic"><use href="#i-search"/></svg></button>
+      {% if user.is_authenticated %}
+      <details class="user-menu">
+        <summary class="icon-btn" aria-label="Account"><svg class="ic"><use href="#i-user"/></svg></summary>
+        <div class="drop">
+          <div class="who"><b>{{ user.display_name }}</b><br><span class="muted">{{ user.email }}</span></div>
+          <a href="{% url 'account' %}">My orders</a>
+          <a href="{% url 'track' %}">Track order</a>
+          <a href="{% url 'wishlist' %}">Wishlist</a>
+          {% if user.is_staff %}<a href="{% url 'dash_overview' %}">Admin dashboard</a>{% endif %}
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+        </div>
+      </details>
+      {% else %}
+      <a class="icon-btn" href="{% url 'login' %}" aria-label="Log in"><svg class="ic"><use href="#i-user"/></svg></a>
+      {% endif %}
+      <a class="icon-btn" href="{% url 'wishlist' %}" aria-label="Wishlist"><svg class="ic"><use href="#i-heart"/></svg>{% if wish_count %}<span class="count" data-wish-count>{{ wish_count }}</span>{% else %}<span class="count" data-wish-count hidden>0</span>{% endif %}</a>
+      <a class="icon-btn" href="{% url 'cart' %}" aria-label="Cart"><svg class="ic"><use href="#i-bag"/></svg>{% if cart_count %}<span class="count" data-cart-count>{{ cart_count }}</span>{% else %}<span class="count" data-cart-count hidden>0</span>{% endif %}</a>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg class="ic"><use href="#i-menu"/></svg></button>
+    </div>
+    <form class="search" id="searchBox" action="{% url 'shop' %}" role="search">
+      <svg class="ic"><use href="#i-search"/></svg>
+      <input type="search" name="q" placeholder="Search sneakers…" value="{{ q|default:'' }}" aria-label="Search sneakers">
+    </form>
+  </div>
+</header>
+{% endblock %}
+
+<main>{% block content %}{% endblock %}</main>
+
+{% block footer %}
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <a class="logo" href="{% url 'home' %}"><span class="logo-mark">FF</span><span class="logo-text">Foot<b>Flex</b></span></a>
+      <p style="margin-top:14px;max-width:300px;color:var(--ink-soft)">Sneakers designed to move with you — from Indian streets to the finish line. Prices in ₹, delivered across India.</p>
+    </div>
+    <div><h4>Shop</h4><ul><li><a href="{% url 'men' %}">Men</a></li><li><a href="{% url 'women' %}">Women</a></li><li><a href="{% url 'kids' %}">Kids</a></li><li><a href="{% url 'shop' %}?sale=1">Sale</a></li></ul></div>
+    <div><h4>Account</h4><ul><li><a href="{% url 'account' %}">My orders</a></li><li><a href="{% url 'wishlist' %}">Wishlist</a></li><li><a href="{% url 'track' %}">Track order</a></li><li><a href="{% url 'cart' %}">Cart</a></li></ul></div>
+    <div><h4>Help</h4><ul><li>7-day easy returns</li><li>6-month warranty</li><li>COD · UPI · Cards</li><li>care@footflex.in</li></ul></div>
+  </div>
+  <div class="container legal"><span>© 2026 FootFlex. All rights reserved.</span><span>Made with Django &amp; MySQL</span></div>
+</footer>
+{% endblock %}
+
+<div class="toasts" id="toasts" aria-live="polite">
+  {% for m in messages %}<div class="toast {% if m.tags == 'error' %}error{% endif %}" role="status">{{ m }}</div>{% endfor %}
+</div>
+<script src="{% static 'js/app.js' %}" defer></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

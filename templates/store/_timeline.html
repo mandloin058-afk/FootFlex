@@ -1,0 +1,7 @@
+{% if order.status == "Cancelled" %}
+<p><span class="status-badge Cancelled">Cancelled</span> <span class="muted small">Stock has been returned to inventory.</span></p>
+{% else %}
+<ol class="timeline" aria-label="Order progress">
+  {% for s in statuses %}<li class="{% if forloop.counter0 < order.step_index %}done{% elif forloop.counter0 == order.step_index %}done now{% endif %}"><div class="dot">{% if forloop.counter0 <= order.step_index %}✓{% else %}{{ forloop.counter }}{% endif %}</div>{{ s }}</li>{% endfor %}
+</ol>
+{% endif %}

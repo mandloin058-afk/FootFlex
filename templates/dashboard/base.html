@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="dash">
+  <nav class="dash-nav" aria-label="Dashboard">
+    <h4>Admin</h4>
+    <a href="{% url 'dash_overview' %}" class="{% if section == 'overview' %}on{% endif %}">Overview</a>
+    <a href="{% url 'dash_products' %}" class="{% if section == 'products' %}on{% endif %}">Products</a>
+    <a href="{% url 'dash_inventory' %}" class="{% if section == 'inventory' %}on{% endif %}">Inventory</a>
+    <a href="{% url 'dash_orders' %}" class="{% if section == 'orders' %}on{% endif %}">Orders</a>
+    <a href="{% url 'dash_customers' %}" class="{% if section == 'customers' %}on{% endif %}">Customers</a>
+    <a href="{% url 'home' %}">← View store</a>
+    <a href="/django-admin/">Django admin</a>
+  </nav>
+  <div class="dash-body">{% block dash %}{% endblock %}</div>
+</div>
+{% endblock %}

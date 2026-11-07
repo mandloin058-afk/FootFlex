@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}My orders — FootFlex{% endblock %}
+{% block content %}
+<div class="container page narrow">
+  <div class="shop-head"><div><h1 class="h1" style="margin:0">My orders</h1><p class="muted" style="margin:4px 0 0">Hi {{ user.display_name }} · {{ user.email }}</p></div><a class="btn btn-ghost btn-sm" href="{% url 'track' %}">Track an order</a></div>
+  {% for o in orders %}
+  <section class="card order-card">
+    <div class="order-head">
+      <div><h3>{{ o.id }}</h3><span class="muted small">{{ o.created_at|date:"d M Y, h:i A" }} · {{ o.payment }}</span></div>
+      <div style="display:flex;gap:10px;align-items:center"><span class="status-badge {{ o.status }}">{{ o.status }}</span><b style="font-size:1.2rem">{{ o.total|inr }}</b></div>
+    </div>
+    {% include "store/_timeline.html" with order=o %}
+    {% for i in o.items.all %}
+    <div class="mini">{% if i.product %}<a class="thumb sm" href="{% url 'product' i.product_id %}">{% shoe i.body i.accent i.product.pattern i.name %}</a>{% else %}<span class="thumb sm">{% shoe i.body i.accent "swoosh" i.name %}</span>{% endif %}
+      <div class="grow"><b>{{ i.name }}</b><span class="small muted">{{ i.color }} · UK {{ i.size }} · ×{{ i.qty }}</span></div><b>{{ i.line_total|inr }}</b></div>
+    {% endfor %}
+    {% if o.can_cancel %}
+    <form method="post" action="{% url 'cancel_order' o.id %}" data-confirm="Cancel order {{ o.id }}?" style="margin-top:14px">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Cancel order</button></form>
+    {% endif %}
+  </section>
+  {% empty %}
+  <div class="empty"><h3>No orders yet</h3><p class="muted">When you place an order it will show up here.</p><a class="btn" href="{% url 'shop' %}">Start shopping</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

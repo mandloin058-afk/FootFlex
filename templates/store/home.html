@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-in">
+    <div class="hero-copy">
+      <span class="pill-badge"><i></i> New Air Tech 2026</span>
+      <h1 class="display">Step into<br><span class="grad">Style</span></h1>
+      <svg class="swoosh" viewBox="0 0 330 18" preserveAspectRatio="none" aria-hidden="true"><path d="M2 14 C90 2 230 2 328 12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+      <p class="lead">Experience the perfect blend of high-end aesthetics and cutting-edge athletic performance. Your next victory starts here.</p>
+      <div class="cta-row">
+        <a class="btn btn-lg" href="{% url 'shop' %}">Shop Now <svg class="ic"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-lg btn-dark" href="{% url 'shop' %}?sort=new"><span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l8 5-8 5z" fill="currentColor"/></svg></span> Explore Collection</a>
+      </div>
+    </div>
+
+    <div class="stage" data-scope>
+      <div class="stage-glow"></div>
+      {% for p in featured %}
+      <div class="slide {% if forloop.first %}on{% endif %}">
+        <a href="{% url 'product' p.pk %}" style="display:contents" aria-label="{{ p.name }}">
+          {% if p.image %}<img class="stage-photo" src="{{ p.image.url }}" alt="{{ p.name }}">{% else %}<div class="stage-photo-placeholder">Product photo coming soon</div>{% endif %}
+        </a>
+        <a class="float-card fc-price" href="{% url 'product' p.pk %}">
+          <span class="fc-ic">₹</span>
+          <span><span class="lbl">{{ p.name }}</span><strong>{{ p.price|inr }}</strong></span>
+        </a>
+        <div class="float-card fc-stock">
+          <span class="lbl"><i class="live {% if p.stock_total <= 12 %}low{% endif %}"></i>{% if p.stock_total <= 12 %}Selling fast{% else %}In Stock{% endif %}</span>
+          <small>{% if p.stock_total <= 12 %}Only {{ p.stock_total }} pairs left{% else %}Ready to ship{% endif %}</small>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="dots" role="tablist" aria-label="Featured sneakers">{% for p in featured %}<button type="button" class="{% if forloop.first %}on{% endif %}" aria-label="{{ p.name }}"></button>{% endfor %}</div>
+    </div>
+  </div>
+</section>
+
+<div class="band"><div class="container perks">
+  <div class="perk"><svg class="ic"><use href="#i-truck"/></svg><span>Free delivery<small>on orders above ₹2,999</small></span></div>
+  <div class="perk"><svg class="ic"><use href="#i-refresh"/></svg><span>7-day returns<small>easy &amp; hassle-free</small></span></div>
+  <div class="perk"><svg class="ic"><use href="#i-wallet"/></svg><span>COD · UPI · Cards<small>pay the way you like</small></span></div>
+  <div class="perk"><svg class="ic"><use href="#i-shield"/></svg><span>6-month warranty<small>on every pair</small></span></div>
+</div></div>
+
+<section class="container section">
+  <div class="section-head"><div><span class="eyebrow">Shop by</span><h2 class="h2" style="margin-top:8px">Pick your category</h2></div></div>
+  <div class="cat-grid">
+    {% for t in tiles %}
+    <a class="cat-tile" href="{% url t.key %}">
+      <div class="media">{% if t.product %}{% product_image t.product %}{% endif %}</div>
+      <div class="cat-info"><div><h3>{{ t.label }}</h3><span class="muted">{{ t.tag }}</span></div><span class="cat-go"><svg class="ic"><use href="#i-arrow"/></svg></span></div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+{% if new_arrivals %}
+<section class="container section" style="padding-top:0">
+  <div class="section-head"><div><span class="eyebrow">Just dropped</span><h2 class="h2" style="margin-top:8px">New arrivals</h2></div><a class="btn btn-ghost btn-sm" href="{% url 'shop' %}?sort=new">View all</a></div>
+  <div class="product-grid">{% for p in new_arrivals %}{% include "store/_card.html" %}{% endfor %}</div>
+</section>
+{% endif %}
+
+<section class="container section" style="padding-top:0">
+  <div class="promo">
+    <div>
+      <span class="eyebrow">Festive offers</span>
+      <h2>Extra savings on every pair</h2>
+      <p style="max-width:440px;opacity:.85">Apply a code in your cart. Prices are in ₹ and include all taxes.</p>
+      <div class="codes">
+        <div class="code">FOOTFLEX10<small>10% off above ₹1,999</small></div>
+        <div class="code">WELCOME200<small>₹200 off above ₹1,499</small></div>
+        <div class="code">FLEXFREE<small>Free delivery</small></div>
+      </div>
+    </div>
+    <div class="media" style="background:var(--accent);border:2px solid var(--paper)">{% if best_sellers %}{% product_image best_sellers.0 %}{% endif %}</div>
+  </div>
+</section>
+
+<section class="container section" style="padding-top:0">
+  <div class="section-head"><div><span class="eyebrow">Most loved</span><h2 class="h2" style="margin-top:8px">Best sellers</h2></div><a class="btn btn-ghost btn-sm" href="{% url 'shop' %}">Shop all</a></div>
+  <div class="product-grid">{% for p in best_sellers %}{% include "store/_card.html" %}{% endfor %}</div>
+</section>
+{% endblock %}

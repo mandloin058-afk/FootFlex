@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}Checkout — FootFlex{% endblock %}
+{% block content %}
+<div class="container page">
+  <h1 class="h1">Checkout</h1>
+  <form method="post" class="two-col" novalidate>
+    {% csrf_token %}
+    <div class="stack">
+      <section class="panel">
+        <h3 class="h2" style="font-size:1.5rem">1 · Delivery address</h3>
+        <div class="form-grid">
+          {% for f in form %}
+          <div class="field {% if f.name == 'line' %}full{% endif %}"><label for="{{ f.id_for_label }}"><span>{{ f.label }}</span></label>{{ f }}{% for e in f.errors %}<p class="field-error">{{ e }}</p>{% endfor %}</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:22px">
+        <h3 class="h2" style="font-size:1.5rem">2 · Payment</h3>
+        {% if payment_error %}<div class="alert">{{ payment_error }}</div>{% endif %}
+        <div class="pay-methods">
+          <label class="pay"><input type="radio" name="method" value="cod" {% if method == 'cod' %}checked{% endif %}><span><b>Cash on Delivery</b><small>Pay when your order arrives</small></span></label>
+          <label class="pay"><input type="radio" name="method" value="upi" {% if method == 'upi' %}checked{% endif %}><span><b>UPI</b><small>GPay, PhonePe, Paytm and more</small></span></label>
+          <label class="pay"><input type="radio" name="method" value="card" {% if method == 'card' %}checked{% endif %}><span><b>Credit / Debit card</b><small>Test card: 4242 4242 4242 4242</small></span></label>
+        </div>
+        <div class="pay-extra" data-for="upi"><div class="field"><label for="upi"><span>UPI ID</span></label><input type="text" id="upi" name="upi" placeholder="name@okhdfc" value="{{ request.POST.upi }}"></div></div>
+        <div class="pay-extra" data-for="card">
+          <div class="field"><label for="cardNo"><span>Card number</span></label><input type="text" id="cardNo" name="card" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242"></div>
+          <div class="form-grid"><div class="field"><label for="cardExp"><span>Expiry (MM/YY)</span></label><input type="text" id="cardExp" name="expiry" placeholder="08/29" autocomplete="cc-exp"></div>
+          <div class="field"><label for="cvv"><span>CVV</span></label><input type="password" id="cvv" name="cvv" inputmode="numeric" maxlength="4" autocomplete="cc-csc"></div></div>
+        </div>
+        <p class="small muted" style="margin:0">Payments are simulated in this demo. Only the last 4 card digits are ever saved.</p>
+      </section>
+    </div>
+
+    <aside class="panel summary">
+      <h3 class="h2" style="font-size:1.5rem">Your order</h3>
+      {% for l in lines %}
+      <div class="mini"><span class="thumb sm">{% product_image l.product l.color %}</span><div class="grow"><b>{{ l.product.name }}</b><span class="small muted">{{ l.color.name }} · UK {{ l.size }} · ×{{ l.qty }}</span></div><b>{{ l.total|inr }}</b></div>
+      {% endfor %}
+      <div class="sum-row" style="margin-top:10px"><span>Subtotal</span><span>{{ t.subtotal|inr }}</span></div>
+      {% if t.discount %}<div class="sum-row"><span>Discount ({{ t.coupon.code }})</span><span>−{{ t.discount|inr }}</span></div>{% endif %}
+      <div class="sum-row"><span>Delivery</span><span>{% if t.shipping %}{{ t.shipping|inr }}{% else %}FREE{% endif %}</span></div>
+      <div class="sum-row total"><span>Total</span><span>{{ t.total|inr }}</span></div>
+      <button class="btn btn-lg btn-block" style="margin-top:16px" type="submit">Place order · {{ t.total|inr }}</button>
+      <a class="link-btn small center" style="display:block;margin-top:12px" href="{% url 'cart' %}">← Back to cart</a>
+    </aside>
+  </form>
+</div>
+{% endblock %}

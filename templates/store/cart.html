@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}Your cart — FootFlex{% endblock %}
+{% block content %}
+<div class="container page">
+  <h1 class="h1">Your cart</h1>
+  {% if not lines %}
+  <div class="empty"><h3>Your cart is empty</h3><p class="muted">Looks like you haven't picked your pair yet.</p><a class="btn" href="{% url 'shop' %}">Start shopping</a></div>
+  {% else %}
+  <div class="two-col">
+    <div>
+      {% for l in lines %}
+      <div class="card line">
+        <a class="thumb" href="{% url 'product' l.product.pk %}">{% product_image l.product l.color %}</a>
+        <div>
+          <h3><a href="{% url 'product' l.product.pk %}">{{ l.product.name }}</a></h3>
+          <div class="muted small">{{ l.color.name }} · UK {{ l.size }} · {{ l.price|inr }} each</div>
+          {% if l.problem %}<div class="warn-line">{% if l.stock %}Only {{ l.stock }} left in this size — reduce quantity.{% else %}Out of stock in this size — please remove.{% endif %}</div>{% endif %}
+          <div class="ops">
+            <form method="post" action="{% url 'cart_update' %}" class="qty">{% csrf_token %}<input type="hidden" name="idx" value="{{ l.idx }}">
+              <button name="action" value="dec" aria-label="Less">−</button><input value="{{ l.qty }}" readonly aria-label="Quantity"><button name="action" value="inc" aria-label="More">+</button></form>
+            <form method="post" action="{% url 'cart_update' %}">{% csrf_token %}<input type="hidden" name="idx" value="{{ l.idx }}"><button class="link-btn small" name="action" value="remove">Remove</button></form>
+          </div>
+        </div>
+        <div class="tot">{{ l.total|inr }}</div>
+      </div>
+      {% endfor %}
+      <a class="link-btn" href="{% url 'shop' %}">← Continue shopping</a>
+    </div>
+
+    <aside class="panel summary">
+      <h3 class="h2" style="font-size:1.6rem">Order summary</h3>
+      {% if t.free_ship_left %}
+      <p class="small" style="margin:0">Add <b>{{ t.free_ship_left|inr }}</b> more for free delivery</p>
+      <div class="progress"><i style="width:{% widthratio t.subtotal FREE_SHIP_ABOVE 100 %}%"></i></div>
+      {% else %}<p class="small"><b>✓ You've unlocked free delivery</b></p>{% endif %}
+
+      {% if t.coupon %}
+      <form method="post" action="{% url 'cart_coupon' %}" class="coupon-form" style="align-items:center">{% csrf_token %}
+        <span class="chip sale">{{ t.coupon.code }}</span><span class="small grow">applied</span><button class="link-btn small" name="remove" value="1">Remove</button></form>
+      {% else %}
+      <form method="post" action="{% url 'cart_coupon' %}" class="coupon-form">{% csrf_token %}<input type="text" name="code" placeholder="Coupon code" aria-label="Coupon code"><button class="btn btn-sm" type="submit">Apply</button></form>
+      <div class="coupon-list">{% for c in coupons %}<span><b>{{ c.code }}</b> {{ c.label }}</span>{% endfor %}</div>
+      {% endif %}
+
+      <div class="sum-row"><span>Subtotal</span><span>{{ t.subtotal|inr }}</span></div>
+      {% if t.discount %}<div class="sum-row"><span>Discount</span><span>−{{ t.discount|inr }}</span></div>{% endif %}
+      <div class="sum-row"><span>Delivery</span><span>{% if t.shipping %}{{ t.shipping|inr }}{% else %}FREE{% endif %}</span></div>
+      <div class="sum-row total"><span>Total</span><span>{{ t.total|inr }}</span></div>
+      <a class="btn btn-lg btn-block" style="margin-top:16px" href="{% url 'checkout' %}">Checkout <svg class="ic"><use href="#i-arrow"/></svg></a>
+    </aside>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

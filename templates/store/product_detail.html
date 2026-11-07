@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load store_tags %}
+{% block title %}{{ product.name }} — FootFlex{% endblock %}
+{% block content %}
+<div class="container page" data-product-page>
+  <div class="crumbs"><a href="{% url 'home' %}">Home</a> / <a href="{% url product.category %}" class="cap">{{ product.category }}</a> / {{ product.name }}</div>
+  <div class="pd" data-scope>
+    <div class="pd-gallery {% if product.photo_list|length > 1 %}has-thumbs{% endif %}">
+      {% if product.photo_list|length > 1 %}
+      <div class="pd-thumbs" role="tablist" aria-label="Product photos">
+        {% for u in product.photo_list %}<button type="button" class="pd-thumb {% if forloop.first %}on{% endif %}" data-thumb="{{ u }}" aria-label="Photo {{ forloop.counter }}"><img src="{{ u }}" alt="" loading="lazy"></button>{% endfor %}
+      </div>
+      {% endif %}
+      <div class="pd-main">
+        <div class="pd-badges">
+          {% if product.discount_pct %}<span class="chip sale">-{{ product.discount_pct }}%</span>{% endif %}
+          {% if product.is_new %}<span class="chip new">New</span>{% endif %}
+        </div>
+        <div class="media">{% if product.photo_list %}<img id="mainPhoto" class="product-photo" src="{{ product.photo_list.0 }}" alt="{{ product.name }}">{% else %}{% product_image product colors.0 %}{% endif %}</div>
+      </div>
+    </div>
+
+    <div class="pd-info">
+      <span class="eyebrow cap">{{ product.category }} · {{ product.type }}</span>
+      <h1>{{ product.name }}</h1>
+      <div class="small"><svg class="ic sm fill"><use href="#i-star"/></svg> <b>{{ product.rating }}</b> · {{ product.reviews }} reviews · {{ product.sold }} sold</div>
+      <div class="pd-price"><b>{{ product.price|inr }}</b>{% if product.discount_pct %}<s>{{ product.mrp|inr }}</s><span class="chip sale">Save {{ product.discount_pct }}%</span>{% endif %}</div>
+      <p class="muted" style="max-width:520px">{{ product.description }}</p>
+
+      <form id="buyForm" method="post" action="{% url 'cart_add' %}" data-ajax data-need-size>
+        {% csrf_token %}
+        <input type="hidden" name="product" value="{{ product.pk }}">
+        <input type="hidden" name="color" value="{{ colors.0.name }}">
+        <input type="hidden" name="size" value="">
+
+        <div class="pd-label"><span>Colour</span><b data-color-name>{{ colors.0.name }}</b></div>
+        <div class="swatches">{% for c in colors %}<button type="button" class="swatch {% if forloop.first %}on{% endif %}" data-swatch {% swatch_attrs c %} aria-label="Colour {{ c.name }}"></button>{% endfor %}</div>
+
+        <div class="pd-label"><span>Select size</span><span><b data-size-name>Choose</b> · <button type="button" class="link-btn" data-guide-open>Size guide</button></span></div>
+        <div class="sizes">
+          {% for s in stocks %}
+          <button type="button" class="size-btn" data-size="{{ s.size }}" data-qty="{{ s.qty }}" {% if not s.qty %}disabled{% endif %}>
+            UK {{ s.size }}{% if s.qty and s.qty <= 3 %}<small>{{ s.qty }} left</small>{% elif not s.qty %}<small>sold out</small>{% endif %}
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="buy-row">
+          <div class="qty"><button type="button" data-step="-1" aria-label="Less">−</button><input type="number" name="qty" value="1" min="1" max="10" readonly aria-label="Quantity"><button type="button" data-step="1" aria-label="More">+</button></div>
+          <button class="btn btn-lg" type="submit" {% if product.total_stock == 0 %}disabled{% endif %}><svg class="ic"><use href="#i-bag"/></svg> {% if product.total_stock == 0 %}Sold out{% else %}Add to cart{% endif %}</button>
+        </div>
+      </form>
+      <form method="post" action="{% url 'wishlist_toggle' %}" data-ajax data-wish style="margin-top:12px">
+        {% csrf_token %}<input type="hidden" name="product" value="{{ product.pk }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="btn btn-ghost btn-block wish-btn {% if wished %}on{% endif %}" style="position:static;width:100%;border-radius:999px;height:auto;padding:12px;display:inline-flex;gap:8px" type="submit"><svg class="ic"><use href="#i-heart"/></svg> Wishlist</button>
+      </form>
+
+      <ul class="perks-list">
+        <li><svg class="ic"><use href="#i-truck"/></svg> Free shipping above ₹2,999 · ₹99 otherwise</li>
+        <li><svg class="ic"><use href="#i-refresh"/></svg> 7-day easy returns on unworn pairs</li>
+        <li><svg class="ic"><use href="#i-shield"/></svg> 6-month warranty · 100% genuine</li>
+      </ul>
+      <form id="pinForm" class="pin-check"><svg class="ic"><use href="#i-pin"/></svg><input id="pinInput" inputmode="numeric" maxlength="6" placeholder="Enter PIN code" aria-label="PIN code"><button class="btn btn-ghost btn-sm" type="submit">Check delivery</button></form>
+      <p id="pinOut" class="small" style="margin:8px 0 0;font-weight:700"></p>
+    </div>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="on" data-tab="t-desc">Description</button>
+    <button type="button" data-tab="t-spec">Specifications</button>
+    <button type="button" data-tab="t-ship">Shipping &amp; returns</button>
+  </div>
+  <div class="tab-panel on" id="t-desc"><p>{{ product.description }}</p></div>
+  <div class="tab-panel" id="t-spec"><table class="spec">{% for k, v in product.spec_pairs %}<tr><th>{{ k }}</th><td>{{ v }}</td></tr>{% empty %}<tr><td class="muted">No specifications added.</td></tr>{% endfor %}</table></div>
+  <div class="tab-panel" id="t-ship"><p>Orders ship within 24 hours. Delivery takes 2–6 business days across India. Return unworn pairs within 7 days of delivery for a refund or exchange. Cash on delivery is available on most PIN codes.</p></div>
+
+  {% if related %}
+  <div class="section-head" style="margin-top:50px"><h2 class="h2">You may also like</h2></div>
+  <div class="product-grid">{% for p in related %}{% include "store/_card.html" %}{% endfor %}</div>
+  {% endif %}
+</div>
+
+<dialog id="sizeGuide">
+  <h3 class="cap">{{ product.category }} size guide (UK → foot length)</h3>
+  <table class="data"><thead><tr><th>UK size</th><th>Foot length (cm)</th></tr></thead>
+    <tbody>{% for s, cm in size_chart %}<tr><td>UK {{ s }}</td><td>{{ cm }} cm</td></tr>{% endfor %}</tbody></table>
+  <p class="small muted" style="margin-top:12px">Measure your foot from heel to longest toe. Between two sizes? Go one size up.</p>
+  <button class="btn btn-sm" type="button" data-guide-close>Close</button>
+</dialog>
+{% endblock %}

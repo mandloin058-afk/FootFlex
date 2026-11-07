@@ -1,0 +1,19 @@
+{% extends "dashboard/base.html" %}
+{% load store_tags %}
+{% block title %}Inventory — FootFlex admin{% endblock %}
+{% block dash %}
+<div class="dash-title"><h1>Inventory</h1>
+  <div class="pill-row">
+    <a class="btn btn-sm {% if show != 'all' %}btn-ghost{% endif %}" href="?show=all">All</a>
+    <a class="btn btn-sm {% if show != 'low' %}btn-ghost{% endif %}" href="?show=low">Low (≤{{ low }})</a>
+    <a class="btn btn-sm {% if show != 'out' %}btn-ghost{% endif %}" href="?show=out">Sold out</a></div></div>
+<div class="table-wrap"><table class="data">
+  <thead><tr><th>Product</th><th>UK sizes — edit quantities and save</th><th>Total</th></tr></thead>
+  <tbody>{% for r in rows %}
+  <tr><td><div class="row-prod"><span class="thumb sm">{% product_image r.p %}</span><div><b>{{ r.p.name }}</b><span class="small muted cap">{{ r.p.category }}</span></div></div></td>
+    <td><form method="post" class="inline-form" style="flex-wrap:wrap">{% csrf_token %}<input type="hidden" name="product" value="{{ r.p.pk }}">
+      {% for s, q in r.sizes %}<label class="small" style="display:grid;gap:3px;font-weight:700">UK {{ s }}<input type="number" min="0" name="qty_{{ s }}" value="{{ q }}" style="width:76px;padding:6px 8px" {% if q == 0 %}class="low"{% endif %}></label>{% endfor %}
+      <button class="btn btn-sm" style="align-self:end">Save</button></form></td>
+    <td><b>{{ r.total }}</b></td></tr>
+  {% empty %}<tr><td colspan="3" class="center muted">Nothing here 🎉</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}
