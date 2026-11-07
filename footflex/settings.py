@@ -9,8 +9,7 @@ load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-insecure-key-change-me")
 DEBUG = os.getenv("DEBUG", "True").lower() in ("1", "true", "yes")
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
-
+ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,.vercel.app").split(",") if h.strip()]
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
