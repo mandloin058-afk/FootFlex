@@ -5,7 +5,7 @@ Pehle React + Node tha, ab poora **Django + MySQL**. Theme: dark black + electri
 
 ## Setup (Windows PowerShell)
 ```powershell
-cd footflex_django
+cd footflex
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
