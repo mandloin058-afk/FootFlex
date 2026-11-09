@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "footflex/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": "media/**"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/media/(.*)",
+      "dest": "footflex/wsgi.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "footflex/wsgi.py"
+    }
+  ]
+}
