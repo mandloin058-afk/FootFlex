@@ -5,11 +5,18 @@
       "src": "footflex/wsgi.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": "media/**"
+        "includeFiles": [
+          "static/**",
+          "media/**"
+        ]
       }
     }
   ],
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "footflex/wsgi.py"
+    },
     {
       "src": "/media/(.*)",
       "dest": "footflex/wsgi.py"
